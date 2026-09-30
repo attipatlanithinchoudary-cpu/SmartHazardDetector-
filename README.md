@@ -1,7 +1,7 @@
-# 🚧 Smart Hazard Detection System (Web Application)
+# 🚧 Smart Hazard Detector (Web Application)
 
 ## 📌 Overview
-The Smart Hazard Detection System is a web application designed to improve road safety by detecting hazards such as potholes, speed breakers, and manholes.
+Smart Hazard Detector is a web application designed to improve road safety by detecting hazards such as potholes, speed breakers, and manholes.
 
 The system uses Firebase Firestore to provide real-time updates and an interactive map interface.
 
@@ -57,10 +57,10 @@ This system provides:
 ## 🔗 Links
 
 🌐 Live Demo  
-https://smart-hazard-detector-seven.vercel.app  
+https://smarthazarddetector.vercel.app  
 
 💻 GitHub Repository  
-https://github.com/Paritosh-Nilmani/SmartHazardDetector  
+https://github.com/attipatlanithinchoudary-cpu/SpeedBreakerDetector  
 
 📱 Mobile App  
 https://github.com/attipatalanithinchoudary-cpu/SpeedBreakerDetector-RoadGuard-  
@@ -93,10 +93,10 @@ ELEVATION_API_KEY=your_elevation_api_key
 ## 🚀 How to Run
 
 Clone the repository:  
-git clone https://github.com/Paritosh-Nilmani/SmartHazardDetector  
+git clone https://github.com/attipatlanithinchoudary-cpu/SpeedBreakerDetector  
 
 Go to project folder:  
-cd SmartHazardDetector  
+cd SpeedBreakerDetector  
 
 Install dependencies:  
 npm install  
@@ -108,7 +108,7 @@ npm run dev
 
 ## 📁 Project Structure
 
-SmartHazardDetector/  
+Smart Hazard Detector/  
 ├── app/  
 ├── components/  
 ├── src/  

@@ -4,7 +4,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "RoadGuard - Road Hazard Detection",
+  title: "Smart Hazard Detector",
   description: "Real-time road hazard detection and navigation app",
   generator: "v0.app",
   icons: {
