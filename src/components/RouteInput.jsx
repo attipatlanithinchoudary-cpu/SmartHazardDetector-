@@ -1,7 +1,9 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Navigation, X, AlertCircle, MapPin, Crosshair } from "lucide-react"
+
+const MIN_SEARCH_LENGTH = 3
 
 export const RouteInput = ({
   google,
@@ -19,12 +21,103 @@ export const RouteInput = ({
   const [isCalculating, setIsCalculating] = useState(false)
   const [useCurrentLocationAsOrigin, setUseCurrentLocationAsOrigin] = useState(false)
   const [routeReady, setRouteReady] = useState(false)
+  const [activeField, setActiveField] = useState(null)
+  const [suggestions, setSuggestions] = useState([])
+  const [isSearching, setIsSearching] = useState(false)
   const originInputRef = useRef(null)
   const destInputRef = useRef(null)
+
+  useEffect(() => {
+    const query = activeField === "origin" ? origin : activeField === "destination" ? destination : ""
+
+    if (!activeField || useCurrentLocationAsOrigin || query.trim().length < MIN_SEARCH_LENGTH) {
+      setSuggestions([])
+      setIsSearching(false)
+      return
+    }
+
+    const controller = new AbortController()
+    const timeoutId = window.setTimeout(async () => {
+      setIsSearching(true)
+      try {
+        const response = await fetch(`/api/places?input=${encodeURIComponent(query.trim())}`, {
+          signal: controller.signal,
+        })
+        const result = await response.json()
+
+        if (!response.ok) {
+          throw new Error(result.error || "Unable to load location suggestions.")
+        }
+
+        setSuggestions(result.suggestions || [])
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error("[v0] Places autocomplete error:", err)
+          setSuggestions([])
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsSearching(false)
+        }
+      }
+    }, 300)
+
+    return () => {
+      controller.abort()
+      window.clearTimeout(timeoutId)
+    }
+  }, [activeField, origin, destination, useCurrentLocationAsOrigin])
+
+  const handleSelectSuggestion = (suggestion) => {
+    if (activeField === "origin") {
+      setOrigin(suggestion.description)
+      setUseCurrentLocationAsOrigin(false)
+      if (originInputRef.current) originInputRef.current.value = suggestion.description
+    }
+
+    if (activeField === "destination") {
+      setDestination(suggestion.description)
+      if (destInputRef.current) destInputRef.current.value = suggestion.description
+    }
+
+    setSuggestions([])
+    setActiveField(null)
+  }
+
+  const renderSuggestions = (field) => {
+    if (activeField !== field) return null
+
+    return (
+      <div className="absolute left-0 right-0 top-full mt-1 max-h-52 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl z-50">
+        {isSearching ? (
+          <div className="px-3 py-2 text-xs text-gray-500">Searching locations...</div>
+        ) : suggestions.length > 0 ? (
+          suggestions.map((suggestion) => (
+            <button
+              key={suggestion.placeId}
+              type="button"
+              onMouseDown={(event) => {
+                event.preventDefault()
+                handleSelectSuggestion(suggestion)
+              }}
+              className="w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none"
+            >
+              {suggestion.description}
+            </button>
+          ))
+        ) : (
+          <div className="px-3 py-2 text-xs text-gray-500">No locations found</div>
+        )}
+      </div>
+    )
+  }
+
   const handleUseCurrentLocation = () => {
     if (userLocation) {
       setUseCurrentLocationAsOrigin(true)
       setOrigin("Your Location")
+      setSuggestions([])
+      setActiveField(null)
       if (originInputRef.current) {
         originInputRef.current.value = "Your Location"
       }
@@ -136,6 +229,8 @@ export const RouteInput = ({
             setOrigin(e.target.value)
             setUseCurrentLocationAsOrigin(false)
           }}
+          onFocus={() => setActiveField("origin")}
+          onBlur={() => window.setTimeout(() => setActiveField(null), 150)}
           disabled={useCurrentLocationAsOrigin}
         />
         <button
@@ -148,6 +243,7 @@ export const RouteInput = ({
           <Crosshair className="w-3 h-3" />
           <span className="hidden sm:inline">Your Location</span>
         </button>
+        {renderSuggestions("origin")}
       </div>
 
       <div className="relative">
@@ -160,7 +256,10 @@ export const RouteInput = ({
           placeholder="Choose destination"
           className="w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           onChange={(e) => setDestination(e.target.value)}
+          onFocus={() => setActiveField("destination")}
+          onBlur={() => window.setTimeout(() => setActiveField(null), 150)}
         />
+        {renderSuggestions("destination")}
       </div>
 
       <div className="flex gap-2">
