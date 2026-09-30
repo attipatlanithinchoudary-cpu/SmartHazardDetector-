@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useRef } from "react"
 import { Navigation, X, AlertCircle, MapPin, Crosshair } from "lucide-react"
 
 export const RouteInput = ({
@@ -21,42 +21,6 @@ export const RouteInput = ({
   const [routeReady, setRouteReady] = useState(false)
   const originInputRef = useRef(null)
   const destInputRef = useRef(null)
-  const originAutocompleteRef = useRef(null)
-  const destAutocompleteRef = useRef(null)
-
-  useEffect(() => {
-    if (!google || !map) return
-
-    try {
-      const options = {
-        fields: ["formatted_address", "geometry", "name"],
-        strictBounds: false,
-      }
-
-      originAutocompleteRef.current = new google.maps.places.Autocomplete(originInputRef.current, options)
-      originAutocompleteRef.current.bindTo("bounds", map)
-      originAutocompleteRef.current.addListener("place_changed", () => {
-        const place = originAutocompleteRef.current.getPlace()
-        if (place.formatted_address) {
-          setOrigin(place.formatted_address)
-          setUseCurrentLocationAsOrigin(false)
-        }
-      })
-
-      destAutocompleteRef.current = new google.maps.places.Autocomplete(destInputRef.current, options)
-      destAutocompleteRef.current.bindTo("bounds", map)
-      destAutocompleteRef.current.addListener("place_changed", () => {
-        const place = destAutocompleteRef.current.getPlace()
-        if (place.formatted_address) {
-          setDestination(place.formatted_address)
-        }
-      })
-    } catch (err) {
-      console.error("[v0] Places Autocomplete error:", err)
-      setError("Places API not available. Please enable 'Places API' in Google Cloud Console.")
-    }
-  }, [google, map])
-
   const handleUseCurrentLocation = () => {
     if (userLocation) {
       setUseCurrentLocationAsOrigin(true)
@@ -80,13 +44,7 @@ export const RouteInput = ({
         setRouteReady(true)
       } catch (err) {
         console.error("[v0] Route calculation error:", err)
-        if (err.message && err.message.includes("LEGACY_API_ERROR")) {
-          setError(
-            "Directions API not enabled. Please enable 'Directions API' (not Routes API) in Google Cloud Console.",
-          )
-        } else {
-          setError(err.message || "Failed to calculate route. Please check your inputs.")
-        }
+        setError(err.message || "Failed to calculate route. Please check your inputs.")
         setRouteReady(false)
       } finally {
         setIsCalculating(false)

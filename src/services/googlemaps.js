@@ -28,7 +28,7 @@ export const loadGoogleMaps = () => {
     }
 
     const script = document.createElement("script")
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry&loading=async&callback=initGoogleMaps&v=weekly`
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry&loading=async&callback=initGoogleMaps&v=weekly`
     script.id = "google-maps-script"
     script.async = true
     script.defer = true
@@ -74,49 +74,42 @@ export const createMarkerSVG = (color, verified = false) => {
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg)
 }
 
-export const getDirections = async (google, origin, destination) => {
-  const directionsService = new google.maps.DirectionsService()
-
+export const getDirections = async (_google, origin, destination) => {
   try {
-    const result = await directionsService.route({
-      origin,
-      destination,
-      travelMode: google.maps.TravelMode.DRIVING,
-      provideRouteAlternatives: false,
+    const response = await fetch("/api/routes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ origin, destination }),
     })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to calculate route.")
+    }
+
     return result
   } catch (error) {
     console.error("[v0] Error calculating route:", error)
-
-    if (error && (error.message?.includes("LegacyApiNotActivatedMapError") || error.code === "NOT_FOUND")) {
-      throw new Error(
-        "LEGACY_API_ERROR: The Directions API is not enabled. Please enable 'Directions API' (not Routes API) in your Google Cloud Console.",
-      )
-    }
-
-    if (error && error.code === "ZERO_RESULTS") {
-      throw new Error("No route found between these locations.")
-    }
-
     throw error
   }
 }
 
 export const calculateRoute = async (google, map, origin, destination) => {
-  const directionsRenderer = new google.maps.DirectionsRenderer({
-    map,
-    polylineOptions: {
+  try {
+    const result = await getDirections(google, origin, destination)
+    const path = result.routes[0].overview_path
+
+    new google.maps.Polyline({
+      path,
+      map,
       strokeColor: "#3B82F6",
       strokeWeight: 5,
       strokeOpacity: 0.8,
-    },
-    suppressMarkers: false,
-  })
+    })
 
-  try {
-    const result = await getDirections(google, origin, destination)
-    directionsRenderer.setDirections(result)
-    const path = result.routes[0].overview_path
     return path
   } catch (error) {
     console.error("Error calculating route:", error)

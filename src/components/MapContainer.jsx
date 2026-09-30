@@ -25,7 +25,7 @@ const MapContainer = ({
   const predictedMarkersRef = useRef({})
   const userMarkerRef = useRef(null)
   const accuracyCircleRef = useRef(null)
-  const directionsRendererRef = useRef(null)
+  const routePolylineRef = useRef(null)
   const googleRef = useRef(null)
 
   const [error, setError] = useState(null)
@@ -65,18 +65,6 @@ const MapContainer = ({
         mapInstanceRef.current = new google.maps.Map(mapRef.current, mapOptions)
 
         if (onMapReady) onMapReady(mapInstanceRef.current, google)
-      }
-
-      if (!directionsRendererRef.current && mapInstanceRef.current) {
-        directionsRendererRef.current = new google.maps.DirectionsRenderer({
-          map: mapInstanceRef.current,
-          polylineOptions: {
-            strokeColor: "#3B82F6",
-            strokeWeight: 6,
-            strokeOpacity: 0.8,
-          },
-          suppressMarkers: false,
-        })
       }
 
       setIsLoading(false)
@@ -263,14 +251,32 @@ const MapContainer = ({
     })
   }, [predictedHazards])
 
-  // Directions renderer
+  // Route polyline
   useEffect(() => {
-    if (mapInstanceRef.current && directionsRendererRef.current && directionsResponse) {
-      directionsRendererRef.current.setDirections(directionsResponse)
+    if (!mapInstanceRef.current || !googleRef.current) return
 
+    if (routePolylineRef.current) {
+      routePolylineRef.current.setMap(null)
+      routePolylineRef.current = null
+    }
+
+    if (directionsResponse) {
+      const google = googleRef.current
       const route = directionsResponse.routes[0]
-      if (route && route.bounds && !isNavigating) {
-        mapInstanceRef.current.fitBounds(route.bounds)
+      const path = route?.overview_path || []
+
+      routePolylineRef.current = new google.maps.Polyline({
+        path,
+        map: mapInstanceRef.current,
+        strokeColor: "#3B82F6",
+        strokeWeight: 6,
+        strokeOpacity: 0.8,
+      })
+
+      if (path.length > 0 && !isNavigating) {
+        const bounds = new google.maps.LatLngBounds()
+        path.forEach((point) => bounds.extend(point))
+        mapInstanceRef.current.fitBounds(bounds)
       }
     }
   }, [directionsResponse, isNavigating])

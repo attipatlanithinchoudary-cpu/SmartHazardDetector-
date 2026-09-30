@@ -66,8 +66,10 @@ export const NavigationPanel = ({
   useEffect(() => {
     if (!userLocation || !currentStep) return
 
-    const stepEndLat = currentStep.end_location.lat()
-    const stepEndLng = currentStep.end_location.lng()
+    const stepEndLat =
+      typeof currentStep.end_location.lat === "function" ? currentStep.end_location.lat() : currentStep.end_location.lat
+    const stepEndLng =
+      typeof currentStep.end_location.lng === "function" ? currentStep.end_location.lng() : currentStep.end_location.lng
 
     const distance = getHaversineDistance(userLocation.lat, userLocation.lng, stepEndLat, stepEndLng)
 
