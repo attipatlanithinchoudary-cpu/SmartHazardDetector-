@@ -1,29 +1,19 @@
 "use client"
 
-import { Gauge, Radar } from "lucide-react"
-
 export const SpeedPanel = ({ currentSpeed, warningDistance, setWarningDistance }) => {
-  const speed = currentSpeed !== null && currentSpeed !== undefined ? Math.round(currentSpeed) : 0
-
   return (
-    <div className="grid gap-3 sm:grid-cols-[0.85fr_1.15fr] mb-4">
-      <div className="status-metric">
-        <div className="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
-          <Gauge className="w-4 h-4 text-blue-600" />
-          Current Speed
-        </div>
-        <div className="mt-2 flex items-end gap-1">
-          <span className="text-4xl font-bold text-blue-600 leading-none">{speed}</span>
-          <span className="text-sm text-gray-600 mb-1">km/h</span>
-        </div>
+    <div className="space-y-4 mb-4">
+      <div className="flex items-center justify-between">
+        <span className="text-gray-700 font-medium">Current Speed</span>
+        <span className="text-3xl font-bold text-blue-600">
+          {currentSpeed !== null && currentSpeed !== undefined ? Math.round(currentSpeed) : 0}
+        </span>
+        <span className="text-gray-600">km/h</span>
       </div>
 
-      <div className="status-metric">
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
-            <Radar className="w-4 h-4 text-orange-500" />
-            Warning Radius
-          </label>
+          <label className="text-gray-700 font-medium">Warning Distance</label>
           <span className="text-lg font-semibold text-orange-500">{warningDistance}m</span>
         </div>
         <input
@@ -33,7 +23,7 @@ export const SpeedPanel = ({ currentSpeed, warningDistance, setWarningDistance }
           step="25"
           value={warningDistance}
           onChange={(e) => setWarningDistance(Number(e.target.value))}
-          className="ui-range mt-4"
+          className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
         />
         <div className="flex justify-between text-xs text-gray-500">
           <span>25m</span>
