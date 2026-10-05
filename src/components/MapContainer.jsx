@@ -7,27 +7,6 @@ import { config } from "../config"
 
 const MIN_CONFIDENCE_THRESHOLD = 0.4 // 40%
 
-const baseMapStyles = [
-  {
-    featureType: "poi",
-    elementType: "labels",
-    stylers: [{ visibility: "off" }],
-  },
-]
-
-const darkMapStyles = [
-  ...baseMapStyles,
-  { elementType: "geometry", stylers: [{ color: "#1d2430" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#1d2430" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#cbd5e1" }] },
-  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#e2e8f0" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#334155" }] },
-  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#0f172a" }] },
-  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#f8fafc" }] },
-  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#475569" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f2a3d" }] },
-]
-
 const MapContainer = ({
   onMapReady,
   hazards = [],
@@ -39,7 +18,6 @@ const MapContainer = ({
   setHazardsInProximity,
   directionsResponse,
   isNavigating = false,
-  theme = "light",
 }) => {
   const mapRef = useRef(null)
   const mapInstanceRef = useRef(null)
@@ -67,7 +45,13 @@ const MapContainer = ({
         const mapOptions = {
           center: { lat: userLocation?.lat || 28.6139, lng: userLocation?.lng || 77.209 },
           zoom: 16,
-          styles: theme === "dark" ? darkMapStyles : baseMapStyles,
+          styles: [
+            {
+              featureType: "poi",
+              elementType: "labels",
+              stylers: [{ visibility: "off" }],
+            },
+          ],
           disableDefaultUI: true,
           zoomControl: true,
           zoomControlOptions: {
@@ -94,13 +78,6 @@ const MapContainer = ({
   useEffect(() => {
     initMap()
   }, [])
-
-  useEffect(() => {
-    if (!mapInstanceRef.current) return
-    mapInstanceRef.current.setOptions({
-      styles: theme === "dark" ? darkMapStyles : baseMapStyles,
-    })
-  }, [theme])
 
   useEffect(() => {
     if (!config.googleMapsApiKey) {
