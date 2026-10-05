@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
+import { Moon, Sun } from "lucide-react"
 import { MapContainer } from "./components/MapContainer"
 import { BottomDock } from "./components/BottomDock"
 import { DetectionConfirmationToast } from "./components/DetectionConfirmationToast"
@@ -33,6 +34,7 @@ import { analyzeRouteForHazards } from "./services/routeAnalysisService"
 import { validateConfig } from "./config"
 
 export default function App() {
+  const [theme, setTheme] = useState("light")
   const [map, setMap] = useState(null)
   const [google, setGoogle] = useState(null)
   const [hazards, setHazards] = useState([])
@@ -61,6 +63,22 @@ export default function App() {
 
   const lastAlertTimeRef = useRef(0)
   const lastAlertedHazardRef = useRef(null)
+
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem("smart-hazard-theme")
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+    setTheme(savedTheme || (prefersDark ? "dark" : "light"))
+  }, [])
+
+  useEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle("dark", theme === "dark")
+    window.localStorage.setItem("smart-hazard-theme", theme)
+  }, [theme])
+
+  const toggleTheme = () => {
+    setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"))
+  }
 
   const handleLocationUpdate = useCallback(
     (newLocation, newSpeed) => {
@@ -355,7 +373,7 @@ export default function App() {
   }, [isNavigating, location, map])
 
   return (
-    <div className="w-full h-screen overflow-hidden relative">
+    <div className="w-full h-screen overflow-hidden relative theme-surface">
       {showFirebaseWarning && <FirebaseStatus onRetry={handleRetryFirebase} />}
 
       {configWarnings.length > 0 && (
@@ -374,6 +392,20 @@ export default function App() {
         onStartNavigation={handleStartNavigation}
         onStopNavigation={handleStopNavigation}
       />
+
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="theme-toggle"
+        aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+        title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      >
+        <span className="theme-toggle-track">
+          <span className="theme-toggle-thumb">
+            {theme === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </span>
+        </span>
+      </button>
 
       <NavigationPanel
         directionsResponse={directionsResponse}
@@ -403,6 +435,7 @@ export default function App() {
         userHeading={heading}
         setHazardsInProximity={setHazardsInProximity}
         isNavigating={isNavigating}
+        theme={theme}
       />
 
       {!isNavigating && (
