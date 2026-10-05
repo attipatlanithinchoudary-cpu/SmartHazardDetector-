@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { CheckCircle, Clock } from "lucide-react"
+import { CheckCircle, Clock, MapPin, ShieldAlert } from "lucide-react"
 
 const hazardTypes = [
   { value: "speed_breaker", label: "Speed Breaker", color: "bg-red-600" },
@@ -67,14 +67,17 @@ export const AddHazardPanel = ({ onAddHazard }) => {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <label className="block text-gray-700 font-medium">Hazard Type</label>
+        <label className="flex items-center gap-2 text-gray-700 font-medium">
+          <ShieldAlert className="w-4 h-4 text-red-500" />
+          Hazard Type
+        </label>
         <div className="grid grid-cols-3 gap-2">
           {hazardTypes.map((type) => (
             <button
               key={type.value}
               onClick={() => setSelectedType(type.value)}
               disabled={isSubmitting}
-              className={`px-3 py-2 rounded-lg font-medium transition-all text-sm ${
+              className={`hazard-choice ${
                 selectedType === type.value
                   ? `${type.color} text-white shadow-lg`
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -94,7 +97,7 @@ export const AddHazardPanel = ({ onAddHazard }) => {
               key={severity}
               onClick={() => setSelectedSeverity(severity)}
               disabled={isSubmitting}
-              className={`px-3 py-2 rounded-lg font-medium transition-all text-sm ${
+              className={`hazard-choice ${
                 selectedSeverity === severity
                   ? "bg-blue-500 text-white shadow-lg"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -109,10 +112,11 @@ export const AddHazardPanel = ({ onAddHazard }) => {
       <button
         onClick={handleSubmit}
         disabled={isSubmitting}
-        className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all ${
+        className={`w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2 ${
           isSubmitting ? "opacity-50 cursor-not-allowed" : ""
         }`}
       >
+        <MapPin className="w-4 h-4" />
         {isSubmitting ? "Reporting..." : "Report Current Location"}
       </button>
 

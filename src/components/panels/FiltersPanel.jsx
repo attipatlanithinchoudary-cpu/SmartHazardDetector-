@@ -36,19 +36,17 @@ export const FiltersPanel = ({ filters, setFilters }) => {
     <div className="space-y-4">
       <div className="space-y-2">
         <label className="block text-gray-700 font-medium">Hazard Types</label>
-        <div className="space-y-1">
+        <div className="grid gap-2 sm:grid-cols-3">
           {hazardTypes.map((type) => (
-            <label key={type.value} className="flex items-center space-x-2 cursor-pointer">
+            <label key={type.value} className="filter-chip">
               <input
                 type="checkbox"
                 checked={filters.types.includes(type.value)}
                 onChange={() => toggleType(type.value)}
-                className="w-4 h-4"
+                className="sr-only"
               />
               <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: type.color }} />
-              <span className="text-gray-700">
-                {type.label} <span className="text-xs text-gray-400">({type.color})</span>
-              </span>
+              <span className="text-gray-700">{type.label}</span>
             </label>
           ))}
         </div>
@@ -56,14 +54,14 @@ export const FiltersPanel = ({ filters, setFilters }) => {
 
       <div className="space-y-2">
         <label className="block text-gray-700 font-medium">Severity Levels</label>
-        <div className="space-y-1">
+        <div className="grid grid-cols-3 gap-2">
           {["low", "medium", "high"].map((severity) => (
-            <label key={severity} className="flex items-center space-x-2 cursor-pointer">
+            <label key={severity} className="filter-chip">
               <input
                 type="checkbox"
                 checked={filters.severities.includes(severity)}
                 onChange={() => toggleSeverity(severity)}
-                className="w-4 h-4"
+                className="sr-only"
               />
               <span
                 className={`w-3 h-3 rounded-full inline-block ${
@@ -76,9 +74,10 @@ export const FiltersPanel = ({ filters, setFilters }) => {
         </div>
       </div>
 
-      <label className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-100 rounded-lg">
-        <input type="checkbox" checked={filters.onlyVerified} onChange={toggleVerified} className="w-4 h-4" />
+      <label className="filter-chip justify-between">
+        <input type="checkbox" checked={filters.onlyVerified} onChange={toggleVerified} className="sr-only" />
         <span className="text-gray-700 font-medium">Verified Hazards Only</span>
+        <span className={`mini-toggle ${filters.onlyVerified ? "mini-toggle-on" : ""}`} />
       </label>
 
       <div className="mt-4 p-3 bg-gray-50 rounded-lg">
